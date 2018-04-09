@@ -1,3 +1,17 @@
 Bulked segregrant analysis tools for outbreeding species （BSATOS）
 
+Author：Fei Shen， China Agricultural University，2018.04.09
+
+To improve the gene mapping efficiency of next generation sequencing-based segregant analysis (BSA) in outbreeding species and realize the rapid candidate gene mining based on multi-omics data, bulked segregant analysis tools for outbreeding species (BSATOS) was developed. Different from the classic two-way pseudo-testcross (PT) strategy, Local phased 3-way BSA mapping strategy was introduced to use three type of segregate makers unbiased. After comparing different statistical methods to evaluate the allele frequency difference, G value method was selected(Paul M. Magwene 2011). Multi-round G value screening and multi-omics data based gene mining were also integrated.
+
+
+in this sofeware, 5 modules were included. 1）Briefly, BSATOS uses DNA-seq data from F1 seedlings separated by phenotype into two extreme pools and their parents. Four important steps were encompassed : (1) DNA sequencing , reads mapping, variations calling. 2) separate SNP genotypes of two pools based on genotypes of parents, AB x BB, AB x AB，AA x AB and for each class, the following process is conducted in isolation; 3) calculate statistic G value and G’ value based on alleles frequency between two extreme pools and then calculate threshold value and identify QTLs . 4) Candidate gene mining from QTL regions based on multi-omics data.
+
+usage：bsatos prep 
+
+       bsatos 
+
+
+
+
 
