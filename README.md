@@ -7,6 +7,7 @@ To improve the gene mapping efficiency of next generation sequencing-based segre
 
 
 
+
 Program: bsatos (bulked segregant analysis tools for outbreeding species)
 Version: 1.0.1
 
@@ -21,4 +22,7 @@ Commands:
   -- smooth  smooth the afd/ed/si/g value 
   -- narrow_peak narrow down the peaks based on the multiple G value peaks and assign RDS to regions
   -- multi select genes based on multi-omics data 
+
+
+
 
