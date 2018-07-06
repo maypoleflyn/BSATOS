@@ -6,11 +6,19 @@ To improve the gene mapping efficiency of next generation sequencing-based segre
 
 
 
-BASTOS:
+Introduction:
 
 https://github.com/maypoleflyn/BSATOS/wiki
-
 
 Download:
 
 https://github.com/maypoleflyn/BSATOS/releases
+
+Installation:
+
+https://github.com/maypoleflyn/BSATOS/wiki/Installation
+
+Commands:
+
+https://github.com/maypoleflyn/BSATOS/wiki/Commands
+
