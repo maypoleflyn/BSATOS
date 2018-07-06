@@ -6,23 +6,11 @@ To improve the gene mapping efficiency of next generation sequencing-based segre
 
 
 
-
-
-Program: bsatos (bulked segregant analysis tools for outbreeding species)
-Version: 1.0.1
-
-Usage:  bsatos <command> [options]
-
-Commands:
-  -- prep    prepare the input data
-  -- phase   construct haplotype block 
-  -- afd     calculate and filter allele frequency difference between two extreme pools
-  -- ed      calculate ED based on the AFD  
-  -- si      calculate |SNP index| based on the AFD
-  -- smooth  smooth the afd/ed/si/g value 
-  -- narrow_peak narrow down the peaks based on the multiple G value peaks and assign RDS to regions
-  -- multi select genes based on multi-omics data 
-
+BASTOS:
 
 https://github.com/maypoleflyn/BSATOS/wiki
 
+
+Download:
+
+https://github.com/maypoleflyn/BSATOS/releases
