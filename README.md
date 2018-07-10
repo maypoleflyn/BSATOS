@@ -22,3 +22,6 @@ Commands:
 
 https://github.com/maypoleflyn/BSATOS/wiki/Commands
 
+Examples:
+
+https://github.com/maypoleflyn/BSATOS/wiki/Examples
