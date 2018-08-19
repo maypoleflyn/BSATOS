@@ -10,6 +10,7 @@ BEGIN {
 use strict;
 use Getopt::Long;
 use File::Basename;
+use Cwd;
 use base 'Exporter';
 our @EXPORT = qw(runhaplotype);
 
@@ -17,17 +18,40 @@ my $G_USAGE = "
 
 Usage: bastos haplotype 
 
-   Option: --Pbam     pre-aligned bam file from pollen parent 
-           --Mbam     pre-aligned bam file from maternal parent
-           --Hbam     pre-aligned bam file from high extreme pool
-           --Lbam     pre-aligned bam file from high extreme pool
-           --genome   reference genome [FASTA format]
-           --phase2   use samtools algorithm or HAPCUT2 algorithm to assembly haplotype [default:T; T: samtools; F:HAPCUT2]   
-           --oprefix  output dir name prefix 
+   Option: --pb  FILE     pre-aligned bam file from pollen parent 
+           --mb  FILE     pre-aligned bam file from maternal parent
+           --hb  FILE     pre-aligned bam file from high extreme pool
+           --lb  FILE     pre-aligned bam file from low extreme pool
+           --r   FILE     reference genome [FASTA format]
+           --phase2  STR  use samtools algorithm or HAPCUT2 algorithm to assembly haplotype [default:T; T: samtools; F:HAPCUT2]   
+           --o  STR       output dir name prefix 
+
+
+
+SNP genotyping Options:
+
+           --dep  INT   skip SNPs with read depth smaller than INT [10]
+           --aq3  INT   skip alignment with mapQ smaller than INT  [20]
+           --vq3  INT   skip SNPs with phred-scaled quality smaller than INT [40]    
+
+Outputs:
+
+  P.bam_block   [FILE]      haplotype blocks of pollen parent
+  M.bam_block   [FILE]      haplotype blocks of maternal parent 
+  H.bam_block   [FILE]      haplotype blocks of High extreme pool
+  L.bam_block   [FILE]      haplotype blocks of Low extreme pool
+  merged.block  [FILE]      merged, corrected and patched haplotype blocks of pollen parent, maternal parent, High extreme pool and Low extreme pool
+  phase_P.bed   [FILE]      BED format haplotype information of pollen parent
+  phase_M.bed   [FILE]      BED format haplotype information of maternal parent
+  phase_H.bed   [FILE]      BED format haplotype information of High extreme parent
+  phase_L.bed   [FILE]      BED format haplotype information of Low extreme parent
+  overlapped.bed [FILE]     BED format haplotype information classified from two parents and two pools
+ 
+
 
 Example:
 
-    bsatos haplotype --Pbam P.bam --Mbam M.bam --Hbam H.bam --Lbam L.bam --genome genome.fasta --oprefix haplotype  
+    bsatos haplotype --pb P.bam --mb M.bam --hb H.bam --lb L.bam --r genome.fasta --o haplotype  
 
 ";
 
@@ -43,23 +67,44 @@ sub runhaplotype {
         my $var = undef;
         my $var1 =undef;
         my $s = undef;
+        my $dep = undef;
+        my $aq = undef;
+        my $vq = undef;
 	GetOptions (
-	"Pbam=s" => \$Pbam,
-	"Mbam=s" => \$Mbam,
-        "Hbam=s" => \$Hbam,
-        "Lbam=s" => \$Lbam,
+	"pb=s" => \$Pbam,
+	"mb=s" => \$Mbam,
+        "hb=s" => \$Hbam,
+        "lb=s" => \$Lbam,
         "phase2=s" =>\$phase2,
-        "genome=s" => \$genome,
+        "r=s" => \$genome,
         "var=s" => \$var, 
 	"oprefix=s"   => \$outputPrefix,
         "s=s" => \$s,
+        "dep=i" =>\$dep,
+        "aq3=i" =>\$aq,
+        "sq3=i" =>\$vq,
 	"help!" => \$help)
 	or die("$G_USAGE");
 	
 	die "$G_USAGE" if ($help);
 	
 	die "$G_USAGE" if ((!defined ($outputPrefix)) || (!defined($genome)));
-   
+
+        unless(defined($phase2)){         
+                        $phase2="T";
+                                }
+
+        unless(defined($aq)){
+                       $aq=20;
+                             }
+        unless(defined($vq)){
+                       $vq=40;
+                            }
+
+       unless(defined($dep)){
+                      $dep=10;
+                            }
+
          my $samtools= "samtools";
          my $bcftools= "bcftools";
          my $bwa="bwa";
@@ -77,10 +122,11 @@ sub runhaplotype {
          my $cmp2="$FindBin::Bin/scripts/cmp_infer_block_step2.pl";
          my $sep= "$FindBin::Bin/scripts/classify_haplotype.pl";
          my $bedops = "bedops";
-         my $filter_vcf="$FindBin::Bin//scripts/filter_vcf.pl";
-         my $dir = "haplotype_dir";
+         my $filter_vcf="$FindBin::Bin/scripts/filter_vcf.pl";
+
+         my $work_dir=getcwd;
+         my $dir = $work_dir."/haplotype_dir";
              
-        
          my $P_phase=$dir."/".basename($Pbam)."_phase";
          my $M_phase=$dir."/".basename($Mbam)."_phase";
          my $H_phase=$dir."/".basename($Hbam)."_phase";
@@ -113,14 +159,15 @@ sub runhaplotype {
           unless(-e $dir){
            print $ofh "mkdir $dir\n";
                         }
-        unless(defined($phase2)){ 
+         if($phase2 eq "T" ){ 
                   
               unless(defined($var)){
                            $var=$dir."/"."var";
-         print $ofh "$samtools mpileup -ugf $genome $Pbam $Mbam $Hbam $Lbam |$bcftools call -mv -|$filter_vcf ->$var\n";
+         print $ofh "$samtools mpileup -ugf $genome -q $aq $Pbam $Mbam $Hbam $Lbam |$bcftools call -mv -|$filter_vcf -d $dep -q $vq ->$var\n";
                                }
-            
-                      
+          
+                    $var1=$dir."/"."var1";                 
+         print $ofh "$filter_vcf -d $dep -q $vq  $var > $var1\n";             
          print $ofh "$samtools phase $Pbam >$P_phase\n";
          print $ofh "$samtools phase $Mbam >$M_phase\n";
          print $ofh "$samtools phase $Hbam >$H_phase\n";
@@ -137,12 +184,12 @@ sub runhaplotype {
            
           unless(defined($var)){
                            $var=$dir."/"."var";
-         print $ofh "$samtools mpileup -ugf $genome $Pbam $Mbam $Hbam $Lbam |$bcftools call -mv  |$filter_vcf ->$var\n";
+         print $ofh "$samtools mpileup -ugf $genome -q $aq $Pbam $Mbam $Hbam $Lbam |$bcftools call -mv - |$filter_vcf -d $dep -q $vq ->$var\n";
                 
                                }
 
                              $var1=$dir."/"."var1";
-         print $ofh "$filter_vcf $var > $var1\n";
+         print $ofh "$filter_vcf -d $dep -q $vq  $var > $var1\n";
          print $ofh "$step1 --bam $Pbam   --VCF $var1 --out $P_phase\n";
          print $ofh "$step1 --bam $Mbam   --VCF $var1 --out $M_phase\n";
          print $ofh "$step1 --bam $Hbam   --VCF $var1 --out $H_phase\n";
@@ -162,12 +209,10 @@ sub runhaplotype {
          print $ofh "$filter -k cn -A A -B E  -C E -D E -E E  $merge  $P_bl  $M_bl $H_bl $L_bl |cut -f  1-2,5-9,14-16,21-23,28-30 -> $merge_bl\n"; 
          print $ofh "$fill_homo $merge_bl $var1  |$cmp1 - |$cmp2 -|$cmp1 - |$cmp2 - |$cmp1 -> $phase_res\n";  
          print $ofh "$sep $phase_res $P_out $M_out\n";
-         print $ofh  "sort -k 1,1 -k 2,2n $P_out > $P_srt\nsort -k 1,1 -k 2,2n $M_out  > $M_srt\n$bedops -i $P_srt $M_srt > $overlap\n";    
-          
-              
-        
-
-  
+         print $ofh "sort -k 1,1 -k 2,2n $P_out > $P_srt\nsort -k 1,1 -k 2,2n $M_out  > $M_srt\n$bedops -i $P_srt $M_srt > $overlap\n";    
+   
+         print $ofh "rm $H_phase $H_ref $L_phase $L_ref $M_phase $M_ref $merge_bl $merge $overlap $P_phase $P_ref $var\n";
+    
          close $ofh;
          unless(defined($s)){      
          &process_cmd("sh $script");

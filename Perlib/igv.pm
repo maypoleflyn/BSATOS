@@ -1,6 +1,6 @@
 
 
-package prep;
+package igv;
 
 BEGIN {
 	$VERSION = '1.0';
@@ -10,12 +10,11 @@ BEGIN {
 use strict;
 use Getopt::Long;
 use base 'Exporter';
-use Cwd;
-our @EXPORT = qw(runprep);
+our @EXPORT = qw(runigv);
 
 my $G_USAGE = "
 
-Usage: bastos prep [options]
+Usage: bastos igv [options]
          
         
 Options:  --hf1  FILE     paired-end1 fastq file from high extreme pool  [FASTQ format]
@@ -34,58 +33,32 @@ Options:  --hf1  FILE     paired-end1 fastq file from high extreme pool  [FASTQ 
 
 Aligment Options:
 
-           --t2   INT        number of threads [1]
+           --t  INT        number of threads [1]
 
 SNV Calling Options:
 
-           --aq2  INT        skip alignments with mapQ smaller than INT [30]
+           --aq  INT        skip alignments with mapQ smaller than INT [30]
 
 SNV filtering Options:
 
-           --cov  INT        average sequencing coverage [30] 
-           --sq2  INT        skip SNVs with phred-scaled quality smaller than [30]
-           --pn   INT        reads counts of minor allele should greater than INT [3]
+           --cov INT        average sequencing coverage [30] 
+           --sq  INT        skip SNVs with phred-scaled quality smaller than [30]
+           --pn  INT        reads counts of minor allele should greater than INT [3]
 
-
-Outputs:
-
- prefix_dir [DIR] 
-
-     g1.res   [FILE]   read counts with different alleles from H & L pools in G1 type loci 
-     g2.res   [FILE]   read counts with different alleles from H & L pools in G2 type loci 
-     g3.res   [FILE]   read counts with different alleles from H & L pools in G3 type loci
-
-    
- File format:
-
-
-  Chromosome	Position     H_REF	H_ALT	L_REF	L_ALT		
-   Chr01         11000       10           1      1        10
-    .              .          .		  .      .        .
-    .              .          .           .      .        .
-    .              .          .           .      .        .
-
-
-Chromosome: the chromosome of markers   
-Position  : the positon in chromosome of markers
-H_REF     : read counts with REF alleles in H pool
-H_ALT     : read counts with ALT alleles in H pool 
-L_REF     : read counts with REF alleles in L pool 
-L_ALT     : read counts with ALT alleles in L pool
 
 Example:
 
 1)
-    bsatos prep --hf1 H_1.fastq --hf2 H_2.fastq --lf1 L_1.fastq --lf2 L_2.fastq --r genome.fasta  --g1 P_M_G1 --g2 P_M_G2 --g3 P_M_G3 --o prep
+    bsatos prep --hf1 H_1.fastq --hf2 H_2.fastq --lf1 L_1.fastq --lf2 L_2.fastq --genome genome.fasta  --g1 P_M_G1 --g2 P_M_G2 --g3 P_M_G3 --prefix prep
 
 OR
 
 2) 
-    bastos prep --hb H.bam --lb L.bam --r genome.fasta --g1 P_M_G1 --g2 P_M_G2 --g3 P_M_G3 --o prep 
+    bastos prep --hb H.bam --lb L.bam --genome genome.fasta --g1 P_M_G1 --g2 P_M_G2 --g3 P_M_G3 --prefix prep 
 
 ";
 
-sub runprep {
+sub runigv {
 	my $Hp1 = undef;
  	my $Hp2 = undef;
         my $Lp1 = undef;
@@ -118,10 +91,10 @@ sub runprep {
         "g3=s"  => \$G3,
 	"o=s"   => \$outputPrefix,
         "s=s" => \$s,
-        "t2=i" => \$t,
-        "aq2=i" =>\$aq,
+        "t=i" => \$t,
+        "aq=i" =>\$aq,
         "cov=i" =>\$cov,
-        "sq2=i" =>\$sq,
+        "sq=i" =>\$sq,
         "pn=i" =>\$pn,
 	"help!" => \$help)
         
@@ -153,9 +126,7 @@ sub runprep {
          my $get_counts="$FindBin::Bin/scripts/get_counts.pl";
          my $get_res="$FindBin::Bin/scripts/get_counts.pl";
          my $filter_dep="$FindBin::Bin/scripts/filter.pl";
-
-         my $work_dir=getcwd;
-         my $dir = $work_dir."/prep_dir";
+         my $dir = "prep_dir";
          my $H_bam=$dir."/".$outputPrefix."_H.bam";
          my $H_srt_bam=$dir."/".$outputPrefix."_H_srt.bam";
          my $H_rm_bam=$dir."/".$outputPrefix."_H_rm.bam";
@@ -202,8 +173,7 @@ sub runprep {
          print $ofh "$samtools rmdup   $H_srt_bam $H_rm_bam\n";
          print $ofh "$samtools rmdup   $L_srt_bam $L_rm_bam\n";
          print $ofh "$samtools index   $L_rm_bam\n";
-         print $ofh "$samtools index   $H_rm_bam\n";      
-         print $ofh "$H_bam $L_bam $H_srt_bam $L_srt_bam\n";    
+         print $ofh "$samtools index   $H_rm_bam\n";         
          print $ofh "$samtools mpileup -ugf $genome -q $aq -l $G1 $H_rm_bam |$bcftools call -m ->$H_G1_snp\n";      
          print $ofh "$samtools mpileup -ugf $genome -q $aq -l $G2 $H_rm_bam |$bcftools call -m ->$H_G2_snp\n";
          print $ofh "$samtools mpileup -ugf $genome -q $aq -l $G3 $H_rm_bam |$bcftools call -m ->$H_G3_snp\n";
@@ -223,16 +193,15 @@ sub runprep {
          print $ofh "$get_counts -d $cov -q $sq  $H_G3_snp > $H_counts_G3\n";
          print $ofh "$get_counts -d $cov -q $sq  $L_G1_snp > $L_counts_G1\n";
          print $ofh "$get_counts -d $cov -q $sq  $L_G2_snp > $L_counts_G2\n";
-         print $ofh "$get_counts -d $cov -q $sq  $L_G3_snp > $L_counts_G3\n";
+         print $ofh "$get_counts -d $cov -q $sq $L_G3_snp > $L_counts_G3\n";
 
 
       print $ofh "sort -k 1,1 -k 2,2n $H_counts_G1 > $tmp1;sort -k 1,1 -k 2,2n $L_counts_G1 >$tmp2;filter -k cn $tmp1 $tmp2 | cut -f 1-4,7-8 - |$filter_dep -d $pn -> $g1\n";
       print $ofh "sort -k 1,1 -k 2,2n $H_counts_G2 > $tmp1;sort -k 1,1 -k 2,2n $L_counts_G2 >$tmp2;filter -k cn $tmp1 $tmp2 | cut -f 1-4,7-8 - |$filter_dep -d $pn ->$g2\n";   
 
      print $ofh "sort -k 1,1 -k 2,2n $H_counts_G3 > $tmp1;sort -k 1,1 -k 2,2n $L_counts_G3 >$tmp2;filter -k cn $tmp1 $tmp2 | cut -f 1-4,7-8 - |$filter_dep -d $pn ->$g3\n";
-  
-    print $ofh "rm $H_G1_snp $H_G2_snp $H_G3_snp $L_G1_snp $L_G2_snp $L_G3_snp $tmp1 $tmp2 $H_counts_G1 $H_counts_G2 $H_counts_G3 $L_counts_G1 $L_counts_G2 $L_counts_G3\n"; 
-    
+
+
          close $ofh;
       
      unless(defined($s)){

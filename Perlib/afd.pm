@@ -11,22 +11,49 @@ use strict;
 use Getopt::Long;
 use base 'Exporter';
 use File::Basename;
+use Cwd;
 our @EXPORT = qw(runafd);
 
 my $G_USAGE = "
 
 Usage:  bastos afd [options]
 
-  Options: --d      The statistic in the pipeline: ED/G value/SNP index; [ed/g/si]; default:g
-           --g1     G1 file from prep 
-           --g2     G2 file from prep 
-           --g3     G3 file> from prep 
-           --phase  phase block file from phase module
-           --prefix output dir name prefix 
+
+Options: 
+           --g1 FILE        read counts with different alleles from H & L pools in G1 type loci from prep module [required]
+           --g2 FILE        read counts with different alleles from H & L pools in G2 type loci from prep module [required]
+           --g3 FILE        read counts with different alleles from H & L pools in G3 type loci from prep module [required]
+           --h  FILE        merged, corrented and patched haplotype block file of two parents and two pools from haplotype module [required]
+           --o  STR         output dir name prefix [afd]
+
+Statistics Options:
+
+      --sd STR    the statistic method: ED/g/si [g]    
+      --w  INT    the sliding window size [1000000] 
+      --th  STR    Threshold selection method [N] 
+                                           1) N: Estimate parameters of the log-normal null-distribution. 
+                                           2) Y: medium plus 3-times standard deviation   
+      --m STR      Smooth curve using multi-window size. Y: YES; N: NO [Y] 
+
+Outputs:
+
+    *_g1.res_afd   [FILE]  G value (ED/SI) based G1 type loci and smoothed curve with different window in each chromosome 
+    *_g2.res_afd   [FILE]  G value (ED/SI) based G2 type loci and smoothed curve with different window in each chromosome
+    *_g3.res_afd   [FILE]  G value (ED/SI) based G3 type loci and smoothed curve with different window in each chromosome
+
+    g1.res.cal.out [FILE] G value (ED/SI) based G1 type loci and smoothed curve with different window across genome
+    g1.res.ad      [FILE] G value (ED/SI) based G1 type loci and smoothed curve with different window across genome with haplotype information 
+  
+    g2.res.cal.out [FILE] G value (ED/SI) based G2 type loci and smoothed curve with different window across genome
+    g2.res.ad      [FILE] G value (ED/SI) based G2 type loci and smoothed curve with different window across genome with haplotype information 
+
+    g3.res.cal.out [FILE] G value (ED/SI) based G3 type loci and smoothed curve with different window across genome
+    g3.res.ad      [FILE] G value (ED/SI) based G3 type loci and smoothed curve with different window across genome with haplotype information 
+     
 
 Example:
 
-   bsatos afd --d g --g1 P_M_G1 --g2 P_M_G2 --g3 P_M_G3 --phase merged.block --prefix afd 
+   bsatos afd --sd g --g1 g1.res --g2 g2.res --g3 g3.res --h merged.block --o afd --w 1000000
  
 ";
  
@@ -40,14 +67,21 @@ sub runafd {
 	my $outputPrefix = undef;
 	my $help = 0;
         my $s = undef;	
+        my $md = undef;
+        my $w = undef;
+        my $t = undef;
+        my $m = undef;
 	GetOptions (
-	"d=s" =>\$d,
+	"sd=s" =>\$d,
         "g1=s" =>\$g1,
         "g2=s" =>\$g2,
         "g3=s" =>\$g3,
-        "phase=s" => \$phase, 
-	"oprefix=s"   => \$outputPrefix,
+        "h=s" => \$phase, 
+	"o=s"   => \$outputPrefix,
         "s=s" => \$s, 
+        "w=i" =>\$w,
+        "m=s" =>\$m,
+        "th=s" =>\$t,
 	"help!" => \$help)
 	or die("$G_USAGE");
 	
@@ -67,9 +101,23 @@ sub runafd {
        if($d eq "si"){
            $cal = "$FindBin::Bin/R/si.R";            
                      } 
-                 
+ 
+        unless(defined($w)){
+           $w=1000000;
+                           }
+        unless(defined($m)){
+           $m= "Y";   
+                           }
+
+        if($m eq "Y"){
+               $md =1;
+                     }else{
+               $md =0;
+                          }
+                   
          my $script = $outputPrefix.".sh";
-         my $dir = "$FindBin::Bin/afd_dir";
+         my $work_dir=getcwd;
+         my $dir = $work_dir."/afd_dir";
          my $gn1 = basename($g1);
          my $gn2 = basename($g2);
          my $gn3 = basename($g3); 
@@ -88,9 +136,9 @@ sub runafd {
              my @chr=&get_chr($g1);
     
            foreach my $cl(@chr){                  
-           print $ofh "Rscript $cal $g1 $cl $gn1\n"; 
-           print $ofh "Rscript $cal $g2 $cl $gn2\n";
-           print $ofh "Rscript $cal $g3 $cl $gn3\n";                              
+           print $ofh "Rscript $cal $g1 $cl $gn1 $w $md \n"; 
+           print $ofh "Rscript $cal $g2 $cl $gn2 $w $md\n";
+           print $ofh "Rscript $cal $g3 $cl $gn3 $w $md\n";                              
                                }
            print $ofh "mkdir $dir\n";
            print $ofh "cat \*$gn1\_afd >>$sum1\n";
@@ -100,10 +148,7 @@ sub runafd {
            print $ofh "$filter -k cn -A A -B E $sum2 $phase > $ad2\n";
            print $ofh "$filter -k cn -A A -B E $sum3 $phase > $ad3\n";     
              
-
-
-           
- 
+         
            print $ofh "mv \*afd $dir\n";  
             
          close $ofh;
@@ -115,12 +160,6 @@ sub runafd {
         &process_cmd("cat $script");
 
                                 }
-
- 
- 
-
-
-
 
          exit(0);
  
@@ -138,8 +177,6 @@ sub runafd {
     return;
                   }
 
- 
-  
  sub  get_chr {
         my @a=@_;
         my %h;

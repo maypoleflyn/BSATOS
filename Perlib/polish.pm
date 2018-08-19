@@ -11,26 +11,57 @@ use strict;
 use Getopt::Long;
 use base 'Exporter';
 use File::Basename;
+use Cwd;
 our @EXPORT = qw(runpolish);
 
 my $G_USAGE = "
 
 Usage: bastos polish 
  
-    Options: --d         The statistic in the pipeline: ED/G value/SNP index; [ed/g/si]; default:g
-             --oprefix   output dir name prefix
-             --g1        G1 file from afd step
-             --g2        G2 file from afd step
-             --g3        G3 file from afd step 
-             --phase     phase block file from phase module 
+    Options: 
+             --o    STR       output dir name prefix [polish]
+             --gs1  FILE      smoothed curve base on G1 type loci across genome with haplotype information from afd module 
+             --gs2  FILE      smoothed curve base on G2 type loci across genome with haplotype information from afd module
+             --gs3  FILE      smoothed curve base on G3 type loci across genome with haplotype information from afd module
+             --h    FILE      merged haplotype block file from haplotype module 
+
+
+Statistics Options:
+
+      --sd  STR   the statistic method: ED/g/si [g]    
+      --w   INT   the sliding window size [1000000] 
+      --th  STR   Threshold selection method [N] 
+                                           1) N: Estimate parameters of the log-normal null-distribution. 
+                                           2) Y: medium plus 3-times standard deviation   
+      --m STR      Smooth curve using multi-window size. Y: YES; N: NO [Y] 
+
+
+
+Outputs:
+
+     g1.res.ad.polish [FILE]  read counts with different alleles in G1 type loci after polish 
+     g2.res.ad.polish [FILE]  read counts with different alleles in G2 type loci after polish
+     g3.res.ad.polish [FILE]  read counts with different alleles in G3 type loci after polish
+
+     *_g1.res.ad_afd  [FILE]  smoothed curve with different window in each chromosome based on polished read counts of G1 type loci
+     *_g2.res.ad_afd  [FILE]  smoothed curve with different window in each chromosome based on polished read counts of G2 type loci
+     *_g3.res.ad_afd  [FILE]  smoothed curve with different window in each chromosome based on polished read counts of G3 type loci
+
+     g1.res.ad.cal.out [FILE] smoothed curve across genome based on polished read counts of G1 type loci 
+     g2.res.ad.cal.out [FILE] smoothed curve across genome based on polished read counts of G2 type loci
+     g3.res.ad.cal.out [FILE] smoothed curve across genome based on polished read counts of G3 type loci
+      
+     g1.res.ad.ad  [FILE] smoothed curve with haplotype information based on polished read counts of G1 type loci      
+     g2.res.ad.ad  [FILE] smoothed curve with haplotype information based on polished read counts of G2 type loci        
+     g3.res.ad.ad  [FILE] smoothed curve with haplotype information based on polished read counts of G3 type loci 
+
 
 Example:
 
-bsatos polish --d g --g1 g1.res.ad.ad --g2 g2.res.ad.ad --g3 g3.res.ad.ad --phase merged.block --prefix polish
+bsatos polish --sd g --gs1 g1.res.ad --gs2 g2.res.ad --gs3 g3.res.ad --h merged.block --o polish
                  
 ";
- 
- 
+  
 sub runpolish {
         my $g1 = undef;
         my $g2 = undef;
@@ -40,21 +71,39 @@ sub runpolish {
 	my $outputPrefix = undef;
 	my $help = 0;
 	my $s = undef;
+        my $t = undef;
+        my $w = undef;
+        my $m = undef;
+        my $md = undef;
 	GetOptions (
-	"d=s" =>\$d,
-        "g1=s" =>\$g1,
-        "g2=s" =>\$g2,
-        "g3=s" =>\$g3,
-        "phase=s" => \$phase, 
-	"oprefix=s"   => \$outputPrefix,
+	"sd=s" =>\$d,
+        "gs1=s" =>\$g1,
+        "gs2=s" =>\$g2,
+        "gs3=s" =>\$g3,
+        "h=s" => \$phase, 
+	"o=s" => \$outputPrefix,
         "s=s" => \$s,
+        "w=i" =>\$w,
+        "m=s" =>\$m,
+        "th=s" =>\$t, 
 	"help!" => \$help)
-	or die("$G_USAGE");
-	
+	or die("$G_USAGE");	
 	die "$G_USAGE" if ($help);
-	
 	die "$G_USAGE" if (!defined $outputPrefix);
              
+      unless(defined($w)){
+           $w=1000000;
+                           }
+        unless(defined($m)){
+           $m= "Y";   
+                           }
+        if($m eq "Y"){
+               $md =1;
+                     }else{
+               $md =0;
+                          }
+   
+
           my $cal;  
           my $polish="$FindBin::Bin/scripts/polish_qtl_region.pl";
           my $thes="$FindBin::Bin/R/thres.R"; 
@@ -71,7 +120,8 @@ sub runpolish {
                      } 
                  
          my $script = $outputPrefix.".sh";
-         my $dir = "$FindBin::Bin/polish_dir";
+         my $work_dir=getcwd;
+         my $dir = $work_dir."/polish_dir";
          my $gn1 = basename($g1);
          my $gn2 = basename($g2);
          my $gn3 = basename($g3); 
@@ -107,9 +157,9 @@ sub runpolish {
         print $ofh "$polish $g3 $t3[0] $t3[1] $t3[2] $t3[3] >$polish3\n";
             
            foreach my $cl(@chr){                  
-           print $ofh "Rscript $cal $polish1 $cl $gn1\n"; 
-           print $ofh "Rscript $cal $polish2 $cl $gn2\n";
-           print $ofh "Rscript $cal $polish3 $cl $gn3\n";                              
+           print $ofh "Rscript $cal $polish1 $cl $gn1 $w $md\n"; 
+           print $ofh "Rscript $cal $polish2 $cl $gn2 $w $md\n";
+           print $ofh "Rscript $cal $polish3 $cl $gn3 $w $md\n";                              
                                }
            print $ofh "mkdir $dir\n";
            print $ofh "cat \*$gn1\_afd >>$sum1\n";

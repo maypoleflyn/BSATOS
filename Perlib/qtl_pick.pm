@@ -11,29 +11,48 @@ use strict;
 use Getopt::Long;
 use base 'Exporter';
 use File::Basename;
+use Cwd;
 our @EXPORT = qw(runqtl_pick);
 
 my $G_USAGE = "
 
 Usage: bastos qtl_pick [options]   
      
-     Options: --oprefix          output dir name prefix
-              --g1               G1 file from polish step 
-              --g2               G2 file from polish step
-              --g3               G3 file from polish step
-              --v                annotated SNVs file from prepar step
-              --sv               annotated SVs file from prepar step
-              --gtf              gene.gtf file                             
-              --hap              haplotye file file from haplotype step 
+     
+     Options: --o        STR        output dir name prefix
+              --gp1      FILE       smoothed curve base on G1 type loci across genome with haplotype information from polish module 
+              --gp2      FILE       smoothed curve base on G2 type loci across genome with haplotype information from polish module
+              --gp3      FILE       smoothed curve base on G3 type loci across genome with haplotype information from polish module
+              --v        FILE       annotated SNVs file from prepar step
+              --sv       FILE       annotated SVs file from prepar step
+              --gtf      FILE       gene.gtf file                             
+              --h        FILE       haplotye file file from haplotype step 
+              --q        INT        mininum phred-scaled quality score [30]         
+              --pr       INT        promoter region [2000]
+Outputs:
+
+       qtl     [FILE]         detected QTLs list file 
+       *.pdf   [FILE]         G value/ED/SI profiles across each chromosome (*:chromosome) 
+       g1_hap  [FILE]         haplotype information in G1 type loci 
+       g2_hap  [FILE]         haplotype information in G2 type loci
+       g2_hap  [FILE]         haplotype information in G3 type loci
+       gene.bed [FILE]        gene bed file 
+       *.gene   [FILE]        gene list located in the QTL regions (*: QTL accession)
+       *.hap  [FILE]          haplotype information located in the QTL regions (*:QTL accession)
+       *.snv [FILE]           screened SNVs based on genetic rules located in the QTL regions (*: QTL accession)  
+       *.sv [FIE]             screened SNVs based on genetic rules located in the QTL regions （*： QTL accession)  
+    
+
 
 Example:
 
-  bsatos qtl_pick --oprefix qtl_pick --g1 g1.res.ad.ad --g2 g2.res.ad.ad --g3 g3.res.ad.ad -v snv.AT_multianno.txt --sv sv.AT_multianno.txt --gtf gene.gtf --hap merged.block
+  bsatos qtl_pick --o qtl_pick --gp1 g1.res.ad.ad --gp2 g2.res.ad.ad --gp3 g3.res.ad.ad -v snv.AT_multianno.txt --sv sv.AT_multianno.txt --gtf gene.gtf --h merged.block
 
 ";
  
  
 sub runqtl_pick {
+
         my $g1 = undef;
         my $g2 = undef;
         my $g3 = undef;
@@ -43,17 +62,22 @@ sub runqtl_pick {
 	my $outputPrefix = undef;
 	my $help = 0;
 	my $s = undef;
-        my $hap = undef;
+        my $hap = undef;      
+        my $pr = undef;
+        my $qu = undef;
+
 	GetOptions (
-	"hap=s"=>\$hap,
-        "g1=s" =>\$g1,
-        "g2=s" =>\$g2,
-        "g3=s" =>\$g3,
+	"h=s"=>\$hap,
+        "gp1=s" =>\$g1,
+        "gp2=s" =>\$g2,
+        "gp3=s" =>\$g3,
         "gtf=s" => \$gtf, 
         "v=s" => \$v, 
         "s=s" => \$s,
+        "pr=i" =>\$pr,
+        "q=i" =>\$qu,
         "sv=s" => \$sv,
-	"oprefix=s"   => \$outputPrefix,
+	"o=s"   => \$outputPrefix,
 	"help!" => \$help)
 	or die("$G_USAGE");
 	
@@ -62,10 +86,17 @@ sub runqtl_pick {
 	die "$G_USAGE" if (!defined $outputPrefix);
              
        
-            
-                 
+        unless(defined($pr)){
+                      $pr=2000;
+                            }
+        unless(defined($qu)){
+                      $qu=30;
+                           }
+
+                             
          my $script = $outputPrefix.".sh";
-         my $dir = "$FindBin::Bin/qtl_pick_dir";
+         my $work_dir=getcwd;
+         my $dir = $work_dir."/qtl_pick_dir";
          my $gn1 = basename($g1);
          my $gn2 = basename($g2);
          my $gn3 = basename($g3); 
@@ -89,7 +120,9 @@ sub runqtl_pick {
          my $gtf2bed="$FindBin::Bin/scripts/gtf2gene_bed.pl";
          my $getbed="$FindBin::Bin/scripts/get.bed.pl"; 
          my $filter_pa="$FindBin::Bin/scripts/filter_snv_based_on_qtl.pl"; 
+
          my $filter_sv="$FindBin::Bin/scripts/filter_sv_based_on_qtl.pl"; 
+
          my $subplot = "$FindBin::Bin/R/sub_plot.R";  
 
       open (my $ofh, ">$script") or die $!;
@@ -129,21 +162,21 @@ sub runqtl_pick {
             print $ofh "perl $getbed $dir/gene.bed $lk[1] $lk[2] $lk[3] >$out_gene\n";        
              
             if($lk[0] eq "P"){  
-            print $ofh "perl $getbed $v $lk[1] $lk[2] $lk[3] |perl $filter_pa --i $lk[0] --hap $dir/g1_hap - > $out_snv\n";
+            print $ofh "perl $getbed $v $lk[1] $lk[2] $lk[3] |perl $filter_pa --d $pr --q $qu --i $lk[0] --h $dir/g1_hap - > $out_snv\n";
             print $ofh "perl $getbed $dir/g1_hap $lk[1] $lk[2] $lk[3] > $out_hap\n"; 
-            print $ofh "perl $getbed $sv $lk[1] $lk[2] $lk[3] |perl $filter_sv --i $lk[0] - > $out_sv\n"; 
+            print $ofh "perl $getbed $sv $lk[1] $lk[2] $lk[3] |perl $filter_sv --d $pr  --i $lk[0] - > $out_sv\n"; 
             print $ofh "Rscript $subplot $g1 $lk[1] $lk[2] $lk[3] $lk[6]\n";  
                              }
             if($lk[0] eq "M"){
-            print $ofh "perl $getbed $v $lk[1] $lk[2] $lk[3] |perl $filter_pa --i $lk[0] --hap $dir/g2_hap - > $out_snv\n";
+            print $ofh "perl $getbed $v $lk[1] $lk[2] $lk[3] |perl $filter_pa --d $pr --q $qu --i $lk[0] --hap $dir/g2_hap - > $out_snv\n";
             print $ofh "perl $getbed $dir/g2_hap $lk[1] $lk[2] $lk[3] > $out_hap\n"; 
-            print $ofh "perl $getbed $sv $lk[1] $lk[2] $lk[3] |perl $filter_sv --i $lk[0] - > $out_sv\n";
+            print $ofh "perl $getbed $sv $lk[1] $lk[2] $lk[3] |perl $filter_sv --d $pr --i $lk[0] - > $out_sv\n";
             print $ofh "Rscript $subplot $g2 $lk[1] $lk[2] $lk[3] $lk[6]\n";
                              }
             if($lk[0] eq "H"){
-            print $ofh "perl $getbed $v $lk[1] $lk[2] $lk[3] |perl $filter_pa --i $lk[0] --hap $dir/g3_hap - > $out_snv\n";
+            print $ofh "perl $getbed $v $lk[1] $lk[2] $lk[3] |perl $filter_pa --d $pr --q $qu --i $lk[0] --hap $dir/g3_hap - > $out_snv\n";
             print $ofh "perl $getbed $dir/g3_hap $lk[1] $lk[2] $lk[3] > $out_hap\n";
-            print $ofh "perl $getbed $sv $lk[1] $lk[2] $lk[3] |perl $filter_sv --i $lk[0] - > $out_sv\n";
+            print $ofh "perl $getbed $sv $lk[1] $lk[2] $lk[3] |perl $filter_sv --d $pr --i $lk[0] - > $out_sv\n";
             print $ofh "Rscript $subplot $g3 $lk[1] $lk[2] $lk[3] $lk[6]\n";
                              }
              
