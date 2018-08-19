@@ -38,15 +38,37 @@ ke<-function(x,w){
                  return(H);
     }
 
-    G1M<-ke(data,1000000);
-    G750<-ke(data,750000);
-    G500<-ke(data,500000);
-    G250<-ke(data,250000);
+  size<-argv[4];
+  size1<-(3/4)*w;
+  size2<-(1/2)*w;
+  size3<-(1/4)*w;
+
+ if(argv[5] == 1){    
+  D1M<-ke(data,size); 
+  D750<-ke(data,size1);
+  D500<-ke(data,size2);
+  D250<-ke(data,size3);            
+  data<-data.frame(data,D1M,D750,D500,D250);
+                  }else{
+    D1M<-ke(data,size);
+  data<-data.frame(data,D1M);     
+                       }
+                       
+        name=paste(argv[2],argv[3],"afd",sep="_");
+        out<-as.character(name);
+        write.table(data,file=name,quote =F,sep = "\t",row.names = F,col.names = F) 
+
+   
+
+
+
+
+
+
+
  
-   name=paste(argv[2],argv[3],"afd",sep="_");
-   out<-as.character(name); 
-   data<-data.frame(data,D1M,D750,D500,D250)
-   write.table(data,file=name,quote =F,sep = "\t",row.names = F,col.names = F) 
+
+
   
 
  

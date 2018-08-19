@@ -37,15 +37,28 @@ ke<-function(x,w){
                  return(H);
     }
 
-    G1M<-ke(data,1000000);
-    G750<-ke(data,750000);
-    G500<-ke(data,500000);
-    G250<-ke(data,250000);
  
-   name=paste(argv[2],argv[3],"afd",sep="_");
-   out<-as.character(name); 
-   data<-data.frame(data,S1M,S750,S500,S250)
-   write.table(data,file=name,quote =F,sep = "\t",row.names = F,col.names = F) 
-  
+
+  size<-argv[4];
+  size1<-(3/4)*w;
+  size2<-(1/2)*w;
+  size3<-(1/4)*w;
+
+ if(argv[5] == 1){    
+  S1M<-ke(data,size); 
+  S750<-ke(data,size1);
+  S500<-ke(data,size2);
+  S250<-ke(data,size3);            
+  data<-data.frame(data,S1M,S750,S500,S250);
+                  }else{
+    S1M<-ke(data,size);
+  data<-data.frame(data,S1M);     
+                       }
+                       
+        name=paste(argv[2],argv[3],"afd",sep="_");
+        out<-as.character(name);
+        write.table(data,file=name,quote =F,sep = "\t",row.names = F,col.names = F) 
+
+
 
 
