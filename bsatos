@@ -10,6 +10,7 @@ use afd;
 use polish;
 use haplotype;
 use qtl_pick;
+use igv;
 use script;
 
 my $G_USAGE = "
@@ -25,6 +26,7 @@ Command: prepar      prepare the parents data
          afd         calculate and filter allele frequency difference between two extreme pools
          polish      polish candidate QTLs region and remove nosiy makers based on haplotype information
          qtl_pick    judge and pick up QTLs from three types of peaks
+         igv         generate files for Integrative Genomics Viewer
          script      write a bash-script for all the data processing
 
 ";
@@ -59,8 +61,8 @@ if ('prep' eq $command) {
         runscript();
 } elsif ('smooth' eq $command){
         runsmooth();
-} elsif ('narrow_peak narrow' eq $command){
-        runnarrow_peak narrow();
+} elsif ('igv' eq $command){
+        igv();
 } elsif ( 'multi' eq $command){
         runmulti();
 } elsif  ('qh' eq $command) {
