@@ -12,6 +12,8 @@ use Getopt::Long;
 use base 'Exporter';
 use File::Basename;
 use FindBin qw($Bin);
+use Cwd; 
+
 
 our @EXPORT = qw(runscript);
 
@@ -160,7 +162,7 @@ sub runscript {
          
 
 
-
+     
 
 
 
@@ -209,7 +211,12 @@ sub runscript {
 	or die("$G_USAGE");
 	
 	die "$G_USAGE" if ($help || !defined($genome));
+
 	
+    unless(defined($outputPrefix)){
+                   $outputPrefix="script";
+                                  }
+
      unless(defined($t)){
                     $t=1;
                         }
@@ -276,7 +283,10 @@ sub runscript {
          my $bsatos ="$FindBin::Bin/bsatos";        
          
          #my $cd = $outputPrefix.".cm.sh";
-         my $dir = $outputPrefix."_dir";
+         my $work_dir=getcwd;
+         my $dir = $work_dir."/".$outputPrefix."_dir";
+
+       
          unless(-e $dir){
            print "mkdir $dir\n";
                         }   

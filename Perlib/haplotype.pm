@@ -82,13 +82,23 @@ sub runhaplotype {
         "s=s" => \$s,
         "dep=i" =>\$dep,
         "aq3=i" =>\$aq,
-        "sq3=i" =>\$vq,
+        "vq3=i" =>\$vq,
+       
 	"help!" => \$help)
 	or die("$G_USAGE");
 	
 	die "$G_USAGE" if ($help);
 	
 	die "$G_USAGE" if ((!defined ($outputPrefix)) || (!defined($genome)));
+
+
+
+       unless(defined($outputPrefix)){
+                      $outputPrefix="haplotype";
+                                     }
+   
+
+
 
         unless(defined($phase2)){         
                         $phase2="T";
@@ -125,7 +135,7 @@ sub runhaplotype {
          my $filter_vcf="$FindBin::Bin/scripts/filter_vcf.pl";
 
          my $work_dir=getcwd;
-         my $dir = $work_dir."/haplotype_dir";
+         my $dir = $work_dir."/".$outputPrefix."_dir";
              
          my $P_phase=$dir."/".basename($Pbam)."_phase";
          my $M_phase=$dir."/".basename($Mbam)."_phase";

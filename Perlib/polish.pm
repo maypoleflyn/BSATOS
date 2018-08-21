@@ -90,6 +90,12 @@ sub runpolish {
 	or die("$G_USAGE");	
 	die "$G_USAGE" if ($help);
 	die "$G_USAGE" if (!defined $outputPrefix);
+
+
+       unless(defined($outputPrefix)){
+                    $outputPrefix="polish";
+                                     }
+
              
       unless(defined($w)){
            $w=1000000;
@@ -121,7 +127,7 @@ sub runpolish {
                  
          my $script = $outputPrefix.".sh";
          my $work_dir=getcwd;
-         my $dir = $work_dir."/polish_dir";
+         my $dir = $work_dir."/".$outputPrefix."_dir";
          my $gn1 = basename($g1);
          my $gn2 = basename($g2);
          my $gn3 = basename($g3); 

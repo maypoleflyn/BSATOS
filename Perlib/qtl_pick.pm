@@ -85,7 +85,9 @@ sub runqtl_pick {
 	
 	die "$G_USAGE" if (!defined $outputPrefix);
              
-       
+        unless(defined($outputPrefix)){
+                     $outputPrefix="qtl_pick";
+                                      }
         unless(defined($pr)){
                       $pr=2000;
                             }
@@ -96,7 +98,7 @@ sub runqtl_pick {
                              
          my $script = $outputPrefix.".sh";
          my $work_dir=getcwd;
-         my $dir = $work_dir."/qtl_pick_dir";
+         my $dir = $work_dir."/".$outputPrefix."_dir";
          my $gn1 = basename($g1);
          my $gn2 = basename($g2);
          my $gn3 = basename($g3); 

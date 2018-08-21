@@ -122,6 +122,10 @@ sub runprepar {
 	die "$G_USAGE" if (!defined $outputPrefix);
 
 
+    unless(defined($outputPrefix)){
+                   $outputPrefix="prepar";
+                                  }
+    
         unless(defined($t)){
                        $t=1;
                            } 
@@ -148,7 +152,7 @@ sub runprepar {
          my $gffread="gffread";      
          
          my $work_dir= getcwd; 
-         my $dir=$work_dir."/prepar_dir";
+         my $dir=$work_dir."/".$outputPrefix."_dir";
          my $anno_dir=$dir."/anno";
 
          my $P_bam=$dir."/".$outputPrefix."_P.bam";
