@@ -47,7 +47,7 @@ RUN cd /root; git clone https://github.com/gpertea/gclib; git clone https://gith
 RUN apt-get -y install libboost-date-time-dev libboost-program-options-dev libboost-system-dev libboost-filesystem-dev libboost-iostreams-dev
 RUN cd /root; git clone --recursive https://github.com/dellytools/delly.git ; cd delly ; make all; make install;
 #install ANNOVAR
-COPY ./src/annovar.latest.tar.gz /root/
+COPY annovar.latest.tar.gz /root/
 RUN cd /root ; tar xvf annovar.latest.tar.gz;
 
 
@@ -62,7 +62,7 @@ RUN cp /root/annovar/*.pl /usr/local/bin/
 
 
 #Finally, get BSATOS
-COPY ./src/BSATOS.tar.gz /root/
+COPY  BSATOS.tar.gz /root/
 RUN cd /root; tar zxvf BSATOS.tar.gz; cd BSATOS; chmod +x *; chmod -R +x scripts/*.pl
 RUN cp -r /root/BSATOS/* /usr/local/bin
 
