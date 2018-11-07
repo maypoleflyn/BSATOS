@@ -10,10 +10,6 @@ Introduction:
 
 https://github.com/maypoleflyn/BSATOS/wiki
 
-Download:
-
-https://github.com/maypoleflyn/BSATOS/releases
-
 Installation:
 
 https://github.com/maypoleflyn/BSATOS/wiki/Installation
