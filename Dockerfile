@@ -70,5 +70,5 @@ RUN cp -r /root/BSATOS/bsatos/* /usr/local/bin
 
 #install modeest library 
 RUN R CMD INSTALL /root/BSATOS/bsatos/modeest_2.1.tar.gz 
-RUN rm -r /root/*
+
 VOLUME /BSATOS
