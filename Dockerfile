@@ -46,9 +46,11 @@ RUN cd /root; git clone https://github.com/gpertea/gclib; git clone https://gith
 #install delly
 RUN apt-get -y install libboost-date-time-dev libboost-program-options-dev libboost-system-dev libboost-filesystem-dev libboost-iostreams-dev
 RUN cd /root; git clone --recursive https://github.com/dellytools/delly.git ; cd delly ; make all; make install;
-#install ANNOVAR
-COPY annovar.latest.tar.gz /root/
-RUN cd /root ; tar xvf annovar.latest.tar.gz;
+
+#get intall ANNOVAR
+
+RUN  cd /root; git clone https://github.com/maypoleflyn/BSATOS; cd BSATOS; tar xvf annovar.latest.tar.gz; cp /root/BSATOS/annovar/*.pl /usr/local/bin   
+
 
 
 RUN cp /root/bwa/bwa /usr/local/bin/bwa
@@ -58,15 +60,15 @@ RUN cp /root/samtools/samtools /usr/local/bin/samtools
 RUN cp /root/HapCUT2/build/HAPCUT2 /usr/local/bin/ ; cp /root/HapCUT2/build/extractFOSMID /usr/local/bin/ ; cp /root/HapCUT2/build/extractHAIRS /usr/local/bin/
 RUN cp /root/gffread/gffread /usr/local/bin/
 RUN cp /root/delly/bin/delly /usr/local/bin/
-RUN cp /root/annovar/*.pl /usr/local/bin/
+#RUN cp /root/annovar/*.pl /usr/local/bin/
 
 
-#Finally, get BSATOS
-COPY  BSATOS.tar.gz /root/
-RUN cd /root; tar zxvf BSATOS.tar.gz; cd BSATOS; chmod +x *; chmod -R +x scripts/*.pl
-RUN cp -r /root/BSATOS/* /usr/local/bin
+#Finally, install BSATOS
+
+RUN cd /root/BSATOS/; tar zxvf bsatos.tar.gz; cd bsatos; chmod +x *; chmod -R +x scripts/*.pl
+RUN cp -r /root/BSATOS/bsatos/* /usr/local/bin
 
 #install modeest library 
-RUN R CMD INSTALL /root/BSATOS/modeest_2.1.tar.gz 
+RUN R CMD INSTALL /root/BSATOS/bsatos/modeest_2.1.tar.gz 
 RUN rm -r /root/*
 VOLUME /BSATOS
