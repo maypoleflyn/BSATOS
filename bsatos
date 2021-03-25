@@ -1,0 +1,123 @@
+#!/usr/bin/perl
+
+use strict;
+use Getopt::Long;
+use FindBin;
+use lib "$FindBin::Bin/Perlib";
+use prep;
+use prepar;
+use afd;
+use polish;
+use haplotype;
+use qtl_pick;
+use igv;
+use all;
+
+my $G_USAGE = "
+
+Program: bsatos (Bulked segregant analysis tools for outbreeding species)
+Version: 1.0
+
+Usage:   bsatos <command> [options]
+
+Commands:
+         prepar      prepare the parents data
+         prep        prepare the pool data
+         haplotype   construct haplotype block
+         afd         calculate and filter allele frequency difference between two extreme pools
+         polish      polish candidate QTLs regions and remove noisy makers based on haplotype information
+         qtl_pick    judge and pick up QTLs from three types of peaks
+         igv         generate files for Integrative Genomics Viewer  
+         all         do prepar, prep, haplotype, afd, polish, qtl_pick and igv in turn
+
+
+
+
+";
+
+my $command = undef;
+if (!defined $ARGV[0] || substr($ARGV[0],0,1) eq '-' || substr($ARGV[0],0,2) eq '--') {
+        die($G_USAGE);
+}
+$command = shift @ARGV; $command = lc $command;
+
+# auto-flush for both stderr and stdout
+ select(STDERR);
+ $| = 1;
+ select(STDOUT);
+ $| = 1;
+
+if('prepar' eq $command){
+         runprepar();
+                       }
+if ('prep' eq $command) {
+        runprep();
+} elsif ('haplotype' eq $command) {
+         runhaplotype();
+} elsif ('qtl_pick' eq $command){
+        runqtl_pick();
+                                                       
+} elsif ('afd' eq $command) {
+         runafd();
+} elsif ('polish' eq $command) {
+        runpolish();
+} elsif ('all' eq $command) {
+        runall();
+} elsif ('smooth' eq $command){
+        runsmooth();
+} elsif ('igv' eq $command){
+        runigv();
+} elsif ( 'multi' eq $command){
+        runmulti();
+} elsif  ('qh' eq $command) {
+        runqh();
+} else {
+  
+    print $G_USAGE;
+       }
+ 
+      
+  exit 0;
+       
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                           
+
+##
+##      BSATOS: Bulk Segregant Analysis Tools for Outbreeding Species
+##
+##      author: Fei Shen <352363546@qq.com>  
+##
+## Copyright (c) 2019 China Agricultural University 
+##
+## Permission is hereby granted, free of charge, to any person obtaining a copy
+## of this software and associated documentation files (the "Software"), to deal
+## in the Software without restriction, including without limitation the rights
+## to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+## copies of the Software, and to permit persons to whom the Software is
+## furnished to do so, subject to the following conditions:
+## 
+## The above copyright notice and this permission notice shall be included in all
+## copies or substantial portions of the Software.
+## 
+## THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+## IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+## FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+## AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+## LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+## OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+## SOFTWARE.
