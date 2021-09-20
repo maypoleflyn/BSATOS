@@ -25,3 +25,7 @@ https://github.com/maypoleflyn/BSATOS/wiki/Commands
 Examples:
 
 https://github.com/maypoleflyn/BSATOS/wiki/Examples
+
+Please contact Fei Shen (shenf1028@gmail.com), if you have any question. 
+
+
