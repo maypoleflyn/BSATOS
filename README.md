@@ -12,7 +12,7 @@ https://github.com/maypoleflyn/BSATOS/wiki
 
 Documentation：
 
-https://drive.google.com/open?id=1lUIlS3-tC181wzCqwDIqTKoz53nL9Rhm
+https://drive.google.com/file/d/1gPjisojwkKkCgLNS0fu3uqafwUp_o7Vm/view?usp=sharing
 
 Installation:
 
