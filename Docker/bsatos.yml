@@ -16,4 +16,3 @@ dependencies:
   - perl-statistics-basic=1.6611=pl526_2
   - perl-statistics-ttest=1.1=pl526_1
   - minimap2=2.22=h5bf99c6_0
-  - r-modeest=2.4.0=r40_1
