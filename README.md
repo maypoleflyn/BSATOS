@@ -26,6 +26,7 @@ Examples:
 
 https://github.com/maypoleflyn/BSATOS/wiki/Examples
 
-Please contact Fei Shen (shenf1028@gmail.com), if you have any question. 
+
+Please contact **Fei Shen (shenf1028@gmail.com)**, if you have any question. 
 
 
