@@ -10,10 +10,6 @@ Introduction and Quick start:
 
 https://github.com/maypoleflyn/BSATOS/wiki
 
-Documentation：
-
-https://drive.google.com/file/d/1gPjisojwkKkCgLNS0fu3uqafwUp_o7Vm/view?usp=sharing
-
 Installation:
 
 https://github.com/maypoleflyn/BSATOS/wiki/Installation
@@ -25,6 +21,12 @@ https://github.com/maypoleflyn/BSATOS/wiki/Commands
 Examples:
 
 https://github.com/maypoleflyn/BSATOS/wiki/Examples
+
+Documentation：
+
+https://drive.google.com/file/d/1gPjisojwkKkCgLNS0fu3uqafwUp_o7Vm/view?usp=sharing
+
+
 
 
 Please contact **Fei Shen (shenf1028@gmail.com)**, if you have any question. 
