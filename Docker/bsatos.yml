@@ -1,0 +1,19 @@
+name: bsatos
+channels:
+  - bioconda
+  - defaults
+  - conda-forge
+dependencies:
+  - bwa=0.7.17=hed695b0_7
+  - samtools=1.9=h8571acd_11
+  - bcftools=1.9=ha228f0b_3
+  - gffread=0.12.1=h8b12597_0
+  - ucsc-gtftogenepred=377=h0b8a92a_4
+  - bedops=2.4.39=hc9558a2_0
+  - bedtools=2.29.2=hc088bd4_0
+  - hapcut2=1.1=hed695b0_0
+  - delly=0.8.2=h43566fd_1
+  - perl-statistics-basic=1.6611=pl526_2
+  - perl-statistics-ttest=1.1=pl526_1
+  - minimap2=2.22=h5bf99c6_0
+  - r-modeest=2.4.0=r40_1
