@@ -111,11 +111,11 @@ Example:
 
 1) Use reads files to run bastos
  
-  bastos all --o result --r genome.fasta --gtf gene.gtf --pf1 P_1.fastq.gz --pf2 P_2.fastq.gz --mf1 M_1.fastq.gz --mf2 M_2.fastq.gz --hf1 H_1.fastq.gz --hf2 H_2.fastq.gz --lf1 L_1.fastq.gz --lf2 L_2.fastq.gz 
+  bsatos all --o result --r genome.fasta --gtf gene.gtf --pf1 P_1.fastq.gz --pf2 P_2.fastq.gz --mf1 M_1.fastq.gz --mf2 M_2.fastq.gz --hf1 H_1.fastq.gz --hf2 H_2.fastq.gz --lf1 L_1.fastq.gz --lf2 L_2.fastq.gz 
 
 2) Use pre-aligned BAMs files to run bastos
 
- bastos all --o result --r genome.fasta --gtf gene.gtf --pb P.bam --mb M.bam --hb H.bam --lb L.bam  
+ bsatos all --o result --r genome.fasta --gtf gene.gtf --pb P.bam --mb M.bam --hb H.bam --lb L.bam  
     
 ";
  
