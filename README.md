@@ -26,6 +26,10 @@ Documentation：
 
 https://drive.google.com/file/d/1gPjisojwkKkCgLNS0fu3uqafwUp_o7Vm/view?usp=sharing
 
+Citation:
+
+Fei Shen, Luca Bianco, Bei Wu, Zhendong Tian, Yi Wang, Ting Wu, Xuefeng Xu, Zhenhai Han, Riccardo Velasco, Paolo Fontana, Xinzhong Zhang, A bulked segregant analysis tool for out-crossing species (BSATOS) and QTL-based genomics-assisted prediction of complex traits in apple, Journal of Advanced Research, 2022, ISSN 2090-1232, https://doi.org/10.1016/j.jare.2022.03.013.
+
 -
 
 Please contact **Fei Shen (shenf1028@gmail.com)** or **Luca Bianco (luca.bianco@fmach.it)**, if you have any question. 
