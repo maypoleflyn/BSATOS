@@ -32,6 +32,6 @@ Fei Shen et al, A bulked segregant analysis tool for out-crossing species (BSATO
 
 -
 
-Please contact **Fei Shen (shenf1028@gmail.com)** or **Luca Bianco (luca.bianco@fmach.it)**, if you have any question. 
+Please contact **Fei Shen (shenf1028@gmail.com)**, if you have any question. 
 
 
